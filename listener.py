@@ -8,14 +8,19 @@ from threading import Thread
 
 class Listener:
     def __init__(self):
-        """Initialise the Listener object with the required attributes"""
+        """
+        Function to initialise the Listener Class with the required attributes
+        This also initialises the pyaudio lib and begins listening
+
+        """
 
         # sets running to true which maintains the while loop in audio_analyser()
         self.running = True
 
-        #
+        # defines the chunk size and sample rate for sampling the audio captured
         self.CHUNK = 2 ** 11
         self.RATE = 44100
+        # Initialise PortAudio and open a new stream
         self.p = pyaudio.PyAudio()
         self.stream = self.p.open(format=pyaudio.paInt16,
                                   channels=1,
@@ -46,7 +51,10 @@ class Listener:
             if peak > 1000:
                 bars = "#" * int(50 * peak / 2 ** 16)
 
-                #
+                # analyses a given chunk of audio data captured and converts it into a frequency & neonote notation
+                # It uses a hanning windows to minise noise and anomalous frequencies
+                # It then uses fourier transforms to convert all the observed frequencies into a list of pitches
+                # and finds the modal average pitch to return
                 data = data * np.hanning(len(data))
                 fft = abs(np.fft.fft(data).real)
                 fft = fft[:int(len(fft) / 2)]
