@@ -5,10 +5,12 @@ import numpy as np
 import math
 from threading import Thread
 
+
 class Listener:
     def __init__(self):
-        """INSERT DOC STRING HERE"""
-        #
+        """Initialise the Listener object with the required attributes"""
+
+        # sets running to true which maintains the while loop in audio_analyser()
         self.running = True
 
         #
@@ -21,8 +23,9 @@ class Listener:
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
 
-        #
-        self.list_of_notes = ['a', 'bf', 'b', 'c', 'df', 'd', 'ef', 'e', 'f', 'gf', 'g', 'af']
+        # array of notes names to be stored in neonote
+        self.list_of_notes = ['a', 'bf', 'b', 'c',
+                              'df', 'd', 'ef', 'e', 'f', 'gf', 'g', 'af']
         self.amplitude = 0,
         self.freq = 0
         self.neonote = 'a'
@@ -30,7 +33,7 @@ class Listener:
     def start(self):
         print("mic listener: started!")
 
-        #
+        # creates a new thread for running the analysis function
         audio_thread = Thread(target=self.audio_analyser)
         audio_thread.start()
 
@@ -51,16 +54,17 @@ class Listener:
                 frq = frq[:int(len(frq) / 2)]
                 self.freq = frq[np.where(fft == np.max(fft))[0][0]] + 1
 
-                #
+                # assign to neonote, a note name, calculated by freq_to_note, based on the frequency of the note
                 self.neonote = self.freq_to_note(self.freq)
 
                 # Shows the peak frequency and the bars for the amplitude
-                print(f"peak frequency: {self.freq} Hz, mididnote {self.neonote}:\t {bars}")
+                print(
+                    f"peak frequency: {self.freq} Hz, mididnote {self.neonote}:\t {bars}")
 
             self.amplitude = peak
 
     def freq_to_note(self, freq: float) -> list:
-        """INSERT DOC STRING HERE
+        """Convert a given frequency to a note name from self.list_of_notes
         """
 
         #

@@ -5,23 +5,23 @@ from music21 import converter
 def get_midi_lists(mf: str) -> list:
     """INSERT DOCSTRING HERE"""
 
-    #
+    # parses a midi file when given the filepath
     score_in = converter.parseFile(mf)
 
     #
     components = []
 
-    #
+    # loops over all of the messages for the notes and rests in the midi score
     for msg in score_in.recurse().notesAndRests:
 
-        #
+        # if the note is a quarter note
         if msg.duration.quarterLength != 0:
 
-            #
+            # attempt to run the contained code, with a fallback (see "except")
             try:
                 pitchlist = msg.pitches
 
-                #
+                # for all pitches in the current message
                 for pitch in pitchlist:
                     #
                     neopitch = make_neonote(pitch)
@@ -30,7 +30,7 @@ def get_midi_lists(mf: str) -> list:
                     if not None:
                         components.append(neopitch)
 
-            #
+            # If the above code encounters an error, print an error, alongside the current message we're looking at
             except:
                 print("error:", msg)
 

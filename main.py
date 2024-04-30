@@ -6,23 +6,25 @@ from neoscore.common import *
 path_to_midi_file = "media/A_Sleepin_Bee.mid" #  <--- change this to your file
 
 class UI:
-    """INSERT DOCSTRING HERE"""
+    """INSERT DOCSTRING HERE
+        This class is responsible for the creation
+    """
 
     def __init__(self):
-        """INSERT DOCSTRING HERE"""
+        """This function instantiates the class"""
 
-        #
+        # 
         self.midilist = midi.get_midi_lists(path_to_midi_file)
         print(f"Midilist contents: {self.midilist}")
 
-        #
+        # initialises the neoscore library, before it's used
         neoscore.setup()
 
-        #
+        # Create some text to display on our score
         annotation = "DEMO digital score BLAH BLAH"
         RichText((Mm(1), Mm(1)), None, annotation, width=Mm(170))
 
-        #
+        # creates a musical Staff, with the below specifications
         staff = Staff((ZERO, Mm(70)), None, Mm(180), line_spacing=Mm(5))
         unit = staff.unit
         clef = Clef(ZERO, staff, "treble")
