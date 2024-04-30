@@ -64,30 +64,41 @@ class Listener:
             self.amplitude = peak
 
     def freq_to_note(self, freq: float) -> list:
-        """Convert a given frequency to a note name from self.list_of_notes
+        """
+        Convert a given frequency to a neoscore compatible note name
+        
+        It retrieves the note name by following an algorithm
+        which converts a frequence in Hertz, to an array index 0-11
+
+        It appends notation to dictate octave by calculating the octave number
+        and adding the corresponding amount of commas or inverted commas to the note name
         """
 
-        #
-        note_number = 12 * math.log2(freq / 440) + 49
-        note_number = round(note_number)
+        # converts frequency into a note name and octave number
+        note_number = 12 * math.log2(freq / 440) + 49 #
+        note_number = round(note_number) # 
         note_position = (note_number - 1) % len(self.list_of_notes)
         neonote = self.list_of_notes[note_position]
         octave = (note_number + 8) // len(self.list_of_notes)
 
-        #
+        # if the octave of the pitch is between 2-6 (inclusive)
         if 2 <= octave <= 6:
 
-            #
+            # if the octave is greater than 4 (middle C)
             if octave > 4:
+                # find the remaining octaves difference
                 ticks = octave - 4
+                # add that number of inverted commas to the note, to ensure the note is displayed in the correct octave above middle C
                 for tick in range(ticks):
                     neonote += "'"
 
-            #
+            # if the octave is less than 4 (middle C octave)
             elif octave < 4:
                 if octave == 3:
+                    #  for octave 3, add a single comma to ensure the note is displayed 1 octave below middle C
                     neonote += ","
                 elif octave == 2:
+                    #  for octave 3, add two commas to ensure the note is displayed 2 octaves below middle C
                     neonote += ",,"
 
         return [neonote]
