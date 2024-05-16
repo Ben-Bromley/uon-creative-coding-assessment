@@ -9,14 +9,23 @@ class Artist:
         self.audio_manager = Audio()
         self.audio_converter = Converter()
 
-    # FUNCTION THAT ENCAPSULATES THE PROCESS OF CREATING ART FROM AUDIO #
     def create_artwork(self, file_path):
-        y, sr, spectral_centroids, rms = self.audio_manager.analyze_audio(
-            file_path)  # obtain the audio to be analysed
+        """
+          1. Use our audio manager to get the stats we need
+          2. Use our audio converter to tranlsate those stats into an image
+        """
+
+        # obtain the audio to be analysed
+        average_freq, average_amp = self.audio_manager.analyze_audio(file_path)
+
+        # given the freq & amp stats, produce an image and return it
         artwork = self.audio_converter.convert_audio_to_visuals(
-            spectral_centroids, rms)  # perform the conversion
+            average_freq, average_amp)
         return artwork
 
-    # FUNCTION TO SAVE THE ARTWORK AS AN IMAGE FILE #
     def save_artwork(self, artwork, filename):
+        """
+          accepts a PIL module "Image" object
+          Uses the inbuilt save function to 
+        """
         artwork.save(filename)
