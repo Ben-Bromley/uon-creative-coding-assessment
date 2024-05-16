@@ -1,17 +1,12 @@
 from PIL import Image
 import numpy as np
-
+from library.matrix import Matrix
 
 class Converter:
 
     def get_colour_matrix(self):
-        return np.array([
-            [245, 100, 191],  # PINK   = SUB      values
-            [191, 100, 245],  # PURPLE = BASS     values
-            [100, 191, 245],  # BLUE   = LOW MID  values
-            [191, 245, 100],  # GREEN  = MID      values
-            [245, 251, 100],  # YELLOW = HIGH MID values
-            [245, 191, 100]])  # ORANGE = HIGH     values
+        matrix_generator = Matrix();
+        return matrix_generator.generate();
 
     # FUNCTION TO CONVERT NUMERICAL VALUES TO COLOURS#
     def value_to_colour(self, value, min_value, max_value):
