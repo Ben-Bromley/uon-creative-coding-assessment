@@ -43,18 +43,17 @@ class Audio:
         wf.writeframes(b''.join(frames))  # write the frames to the file
         wf.close()  # close to save memory
 
-    # FUNCTION TO ANALYSE AND EXTRACT INFORMATION FROM THE AUDIO - AUDIO ANALYSIS [LIBROSA] #
-
     def analyze_audio(self, file_path):
-        y, sr = librosa.load(file_path)  # LOAD THE AUDIO FILE
+        """
+            Use librosa to get average frequency/amplitude
 
-        # EXTRACT TIME #
-        # duration = librosa.get_duration(y=y, sr=sr)  # SAVE THE LENGTH OF THE FILE
-
-        # EXTRACT FREQUENCY CONTENT #
-        # get the spectral centroid (average frequency of the sound over time)
-        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
+            Parameters:
+            filepath (string): the path to the file to load
+        """
+        # load audio into librosa
+        y, sr = librosa.load(file_path)
+        # get "spectral centroid" (average frequency of sample)
+        average_freq = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
         # calculate the average amplitude for each sample change
-        rms = librosa.feature.rms(y=y)[0]
-        # 'y' = DATATYPE, 'sr' = TARGET SAMPLE RATE
-        return y, sr, spectral_centroids, rms
+        average_amp = librosa.feature.rms(y=y)[0]
+        return average_freq, average_amp
