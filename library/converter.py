@@ -12,7 +12,7 @@ class Converter:
             convert the list of average pitches into a list of hue values
         """
         # create a list of values 0-255 to select from
-        hue_range = np.array(range(255))
+        hue_range = np.array(range(0, 255, 5))
 
         # get min & max values
         min_freq, max_freq = np.min(average_freqs), np.max(average_freqs)
