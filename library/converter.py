@@ -2,8 +2,10 @@ from PIL import Image
 import numpy as np
 from library.matrix import Matrix
 
+# 
 class Converter:
 
+    # 
     def get_colour_matrix(self):
         matrix_generator = Matrix();
         return matrix_generator.generate();
