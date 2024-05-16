@@ -1,6 +1,5 @@
 from PIL import Image
 import numpy as np
-from library.matrix import Matrix
 import colorsys
 
 #
@@ -12,7 +11,6 @@ class Converter:
         """
             convert the list of average pitches into a list of hue values
         """
-
         # create a list of values 0-255 to select from
         hue_range = np.array(range(255))
 
@@ -56,9 +54,10 @@ class Converter:
         saturation = saturation / 100
         lightness = lightness / 100
 
+        # 
         decimal_rgb = colorsys.hls_to_rgb(hue, lightness, saturation)
 
-        print(hue, saturation, lightness);
+        # 
         rgb_list = []
         for value in decimal_rgb:
             rgb_list.append(int(value * 255))
