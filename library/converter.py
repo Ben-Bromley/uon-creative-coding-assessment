@@ -8,35 +8,6 @@ import colorsys
 
 class Converter:
 
-    #
-    def get_colour_matrix(self):
-        matrix_generator = Matrix()
-        return matrix_generator.generate()
-
-    # FUNCTION TO CONVERT NUMERICAL VALUES TO COLOURS#
-    def value_to_colour(self, value, min_value, max_value):
-        colour_matrix = self.get_colour_matrix()
-
-        log_values = np.log(
-            np.clip(value, a_min=min_value, a_max=max_value) + 1)
-        log_min = np.log(min_value + 1)
-        log_max = np.log(max_value + 1)
-
-        norm_value = (log_values - log_min) / (log_max - log_min)
-        color_idx = (norm_value * (len(colour_matrix) - 1)).astype(int)
-
-        # Ensure the index is within valid range
-        color_idx = np.clip(color_idx, 0, len(colour_matrix) - 1)
-
-        # return given colour
-        return colour_matrix[color_idx]
-
-        # normalise the value to be between 0 and 1
-        # norm_value = (value - min_value) / (max_value - min_value)
-        # determine what colour it should equate to
-        # colour_id = int(norm_value * (len(colour_matrix) - 1))    # -1 to select correct array position
-        # return colour_matrix[colour_id]  # return that colour id
-
     def pitches_to_hues(self, average_freqs):
         """
             convert the list of average pitches into a list of hue values
@@ -106,13 +77,9 @@ class Converter:
 
         # get total number of samples captured
         num_frames = len(average_freqs)
-        colours = self.value_to_colour(average_freqs,
-                                       np.min(average_freqs),
-                                       np.max(average_freqs))
 
         # for each column of pixels in the image, assign a colour
         for x in range(width):
-
             # determine the time period associated with the x position
             idx = int(x / width * num_frames)
             # convert the amplitude into a saturation
