@@ -2,13 +2,15 @@ from PIL import Image
 import numpy as np
 from library.matrix import Matrix
 
-# 
+#
+
+
 class Converter:
 
-    # 
+    #
     def get_colour_matrix(self):
-        matrix_generator = Matrix();
-        return matrix_generator.generate();
+        matrix_generator = Matrix()
+        return matrix_generator.generate()
 
     # FUNCTION TO CONVERT NUMERICAL VALUES TO COLOURS#
     def value_to_colour(self, value, min_value, max_value):
@@ -21,8 +23,11 @@ class Converter:
 
         norm_value = (log_values - log_min) / (log_max - log_min)
         color_idx = (norm_value * (len(colour_matrix) - 1)).astype(int)
+        
         # Ensure the index is within valid range
         color_idx = np.clip(color_idx, 0, len(colour_matrix) - 1)
+
+        # return given colour
         return colour_matrix[color_idx]
 
         # normalise the value to be between 0 and 1
@@ -40,29 +45,31 @@ class Converter:
 
     # CONVERT THE AUDIO INTO VISUALS - DATA CONVERSION #
 
-    def convert_audio_to_visuals(self, spectral_centroids,
-                                 rms):
-        width, height = 800, 800  # the sizes of the image
-        visual = Image.new("RGBA", (width, height))  # create a new image file
-        pixels = visual.load()  # create a place to store the pixel data
+    def convert_audio_to_visuals(self, average_freq, average_amp):
+        width, height = 800, 800  # image dimensions
+        # instantiate image object 800x800px
+        visual = Image.new("RGBA", (width, height))
+        pixels = visual.load()  # load pixel data, allocate memory for image
 
-        num_frames = len(spectral_centroids)
-        colours = self.value_to_colour(spectral_centroids,
-                                       np.min(spectral_centroids),
-                                       np.max(spectral_centroids))
-        min_rms, max_rms = np.min(rms), np.max(rms)
+        # get total number of samples captured
+        num_frames = len(average_freq)
+        colours = self.value_to_colour(average_freq,
+                                       np.min(average_freq),
+                                       np.max(average_freq))
+        min_amplitude, max_amplitude = np.min(average_amp), np.max(average_amp)
 
-        # for every pixel in the image
-        # Map spectral centroids and RMS to pixels
-        for x in range(width):  # for the length of the image
+        # for each column of pixels in the image, assign a colour
+        for x in range(width):
             # determine the time period associated with the x position
             idx = int(x / width * num_frames)
             colour = colours[idx]  # get the colour for that pixel
 
             # convert the amplitude value into it's appropriate alpha value
-            alpha = self.value_to_alpha(rms[idx], min_rms, max_rms)
+            alpha = self.value_to_alpha(
+                average_amp[idx], min_amplitude, max_amplitude)
 
+            # go down the height of the image and fill in the pixels
             for y in range(height):
-                pixels[x, y] = (colour[0], colour[1], colour[2], alpha)
+                pixels[x, y] = (colour[0], colour[1], colour[2])
 
         return visual
