@@ -1,68 +1,97 @@
 from PIL import Image
 import numpy as np
-from library.matrix import Matrix
+import colorsys
 
-# 
+#
+
+
 class Converter:
 
-    # 
-    def get_colour_matrix(self):
-        matrix_generator = Matrix();
-        return matrix_generator.generate();
+    def pitches_to_hues(self, average_freqs):
+        """
+            convert the list of average pitches into a list of hue values
+        """
+        # create a list of values 0-255 to select from
+        hue_range = np.array(range(0, 255, 5))
 
-    # FUNCTION TO CONVERT NUMERICAL VALUES TO COLOURS#
-    def value_to_colour(self, value, min_value, max_value):
-        colour_matrix = self.get_colour_matrix()
+        # get min & max values
+        min_freq, max_freq = np.min(average_freqs), np.max(average_freqs)
 
-        log_values = np.log(
-            np.clip(value, a_min=min_value, a_max=max_value) + 1)
-        log_min = np.log(min_value + 1)
-        log_max = np.log(max_value + 1)
+        # use log values to simplify numbers
+        log_values = np.log(average_freqs + 1)
+        log_min = np.log(min_freq + 1)
+        log_max = np.log(max_freq + 1)
 
-        norm_value = (log_values - log_min) / (log_max - log_min)
-        color_idx = (norm_value * (len(colour_matrix) - 1)).astype(int)
-        # Ensure the index is within valid range
-        color_idx = np.clip(color_idx, 0, len(colour_matrix) - 1)
-        return colour_matrix[color_idx]
+        # a list of how high notes are within the range, represented as a number between 0-1
+        pitch_percentages = (log_values - log_min) / (log_max - log_min)
+        # convert percent into an index of hue_range
+        color_idx = (pitch_percentages * (len(hue_range) - 1)).astype(int)
 
-        # normalise the value to be between 0 and 1
-        # norm_value = (value - min_value) / (max_value - min_value)
-        # determine what colour it should equate to
-        # colour_id = int(norm_value * (len(colour_matrix) - 1))    # -1 to select correct array position
-        # return colour_matrix[colour_id]  # return that colour id
+        # Ensure index is within valid range
+        color_idx = np.clip(color_idx, 0, len(hue_range) - 1)
 
-    # FUNCTION TO CONVERT NUMERICAL VALUES TO AN RGBA ALPHA/TRANSPARENCY LEVEL
+        # return given colour
+        return hue_range[color_idx]
 
-    def value_to_alpha(self, value, min_value, max_value):
-        # normalise the value to be between 0 and 1
-        norm_value = (value - min_value) / (max_value - min_value)
-        return int(norm_value * 255)
+    def amplitude_to_saturation(self, current_avg_amp, average_amps):
+        """
+            Calculate a percentage saturation based on how high the current avg amp is
+            use the minimum average amplitude to adjust incase of non-zero minimums
+        """
+        min_amplitude, max_amplitude = np.min(
+            average_amps), np.max(average_amps)
+        saturation = int(((current_avg_amp - min_amplitude) /
+                         (max_amplitude - min_amplitude)) * 100)
+        return saturation
 
-    # CONVERT THE AUDIO INTO VISUALS - DATA CONVERSION #
+    def hsl_to_rgb(self, hue, saturation, lightness=100):
+        """
+            accept typical 0-255 hue, 0-100 saturation, and 0-100 lightness
+            return an RGB value
+        """
+        # normalise values, colorsys expects 0-1
+        hue = hue / 255
+        saturation = saturation / 100
+        lightness = lightness / 100
 
-    def convert_audio_to_visuals(self, spectral_centroids,
-                                 rms):
-        width, height = 800, 800  # the sizes of the image
-        visual = Image.new("RGBA", (width, height))  # create a new image file
-        pixels = visual.load()  # create a place to store the pixel data
+        # 
+        decimal_rgb = colorsys.hls_to_rgb(hue, lightness, saturation)
 
-        num_frames = len(spectral_centroids)
-        colours = self.value_to_colour(spectral_centroids,
-                                       np.min(spectral_centroids),
-                                       np.max(spectral_centroids))
-        min_rms, max_rms = np.min(rms), np.max(rms)
+        # 
+        rgb_list = []
+        for value in decimal_rgb:
+            rgb_list.append(int(value * 255))
+        
+        return tuple(rgb_list)
 
-        # for every pixel in the image
-        # Map spectral centroids and RMS to pixels
-        for x in range(width):  # for the length of the image
+    def convert_audio_to_visuals(self, average_freqs, average_amps):
+        """
+            initialise a PIL image, calculate colours based on amp & freq,
+            then add those colours to 2d pixel array
+        """
+        width, height = 800, 800  # image dimensions
+        # instantiate image object 800x800px
+        visual = Image.new("RGBA", (width, height))
+        pixels = visual.load()  # load pixel data, allocate memory for image
+
+        # get total number of samples captured
+        num_frames = len(average_freqs)
+
+        # for each column of pixels in the image, assign a colour
+        for x in range(width):
             # determine the time period associated with the x position
             idx = int(x / width * num_frames)
-            colour = colours[idx]  # get the colour for that pixel
+            # convert the amplitude into a saturation
+            saturation = self.amplitude_to_saturation(
+                average_amps[idx], average_amps)
+            hues = self.pitches_to_hues(average_freqs)
+            hue = hues[idx]  # get the colour for that pixel
 
-            # convert the amplitude value into it's appropriate alpha value
-            alpha = self.value_to_alpha(rms[idx], min_rms, max_rms)
+            # convert to rgb for pixel map
+            rgb = self.hsl_to_rgb(hue, saturation, lightness=50)
 
+            # go down the height of the image and fill in the pixels
             for y in range(height):
-                pixels[x, y] = (colour[0], colour[1], colour[2], alpha)
+                pixels[x, y] = rgb
 
         return visual
